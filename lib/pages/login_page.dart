@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:student_management_system_app/components/BackgroundCustompaint.dart';
 import 'package:student_management_system_app/components/BlueBackgroundCustompaint.dart';
+import 'package:student_management_system_app/pages/HomePage.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -9,6 +10,16 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: BottomAppBar(
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            '© 2023 Dream School. All rights reserved.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+        ),
+      ),
       body: Stack(
         children: [
           CustomPaint(
@@ -32,14 +43,6 @@ class LoginPage extends StatelessWidget {
                   backgroundImage: AssetImage('assets/student_login.jpg'),
                 ),
                 const SizedBox(height: 20),
-                // const Text(
-                //   'Welcome to Dream School',
-                //   style: TextStyle(
-                //     fontSize: 28,
-                //     fontWeight: FontWeight.w800,
-                //     color: Colors.black,
-                //   ),
-                // ),
                 Column(
                   children: [
                     const Text(
@@ -129,6 +132,11 @@ class LoginPage extends StatelessWidget {
                   child: TextButton(
                     onPressed: () {
                       // Handle login action
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const Homepage(),
+                        ),
+                      );
                     },
                     child: const Text(
                       'Login',
