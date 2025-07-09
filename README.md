@@ -1,14 +1,3 @@
----
-
-````markdown
-# 📱 Student Management System - Flutter Student App
-
-This Flutter app is the **student-side** of a full-stack Student Management System. It allows students to log in, view their academic results, receive notifications, access educational resources, and engage in student communities.
-
-> The backend is powered by **Node.js (Express.js)** and **PostgreSQL**, while admin and teacher dashboards are built with **React.js**.
-
----
-
 ## 🚀 Features
 
 ✅ Login & Authentication  
