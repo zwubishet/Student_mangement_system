@@ -5,6 +5,7 @@ import 'package:student_management_system_app/components/bottom_navigation.dart'
 import 'package:student_management_system_app/components/carousel_Home_page.dart';
 import 'package:student_management_system_app/components/complain_request_page.dart';
 import 'package:student_management_system_app/components/continer.dart';
+import 'package:student_management_system_app/services/getStudentData.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -55,18 +56,40 @@ class DropdownCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        YearDropdownCards(title: "Year-2024", grade: "Grade 5"),
-        SizedBox(height: 10),
-        YearDropdownCards(title: "Year-2023", grade: "Grade 4"),
-        SizedBox(height: 10),
-        YearDropdownCards(title: "year-2022 ", grade: "Grade 3"),
-        SizedBox(height: 10),
-        YearDropdownCards(title: "Year-2021", grade: "Grade 2"),
-        SizedBox(height: 10),
-        YearDropdownCards(title: "Year-2020", grade: "Grade 1"),
-      ],
+    return FutureBuilder<Map<String, dynamic>>(
+      future: studentData(context),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            height: 200,
+            width: double.infinity,
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Container(
+            height: 200,
+            width: double.infinity,
+            alignment: Alignment.center,
+            child: Text('Error loading data'),
+          );
+        } else {
+          final data = snapshot.data!;
+          return Column(
+            children: [
+              YearDropdownCards(title: "Year-2024", grade: "Grade 5"),
+              SizedBox(height: 10),
+              YearDropdownCards(title: "Year-2023", grade: "Grade 4"),
+              SizedBox(height: 10),
+              YearDropdownCards(title: "year-2022 ", grade: "Grade 3"),
+              SizedBox(height: 10),
+              YearDropdownCards(title: "Year-2021", grade: "Grade 2"),
+              SizedBox(height: 10),
+              YearDropdownCards(title: "Year-2020", grade: "Grade 1"),
+            ],
+          );
+        }
+      },
     );
   }
 }

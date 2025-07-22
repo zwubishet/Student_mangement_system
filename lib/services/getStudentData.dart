@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:student_management_system_app/services/loginServices.dart';
 
-Future<Map<String, dynamic>> studentData() async {
+Future<Map<String, dynamic>> studentData(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   final token = await getToken(); // getToken must return a String
 
@@ -12,16 +13,16 @@ Future<Map<String, dynamic>> studentData() async {
     headers: {"Authorization": "Bearer $token"},
   );
 
-  if (res.statusCode == 401) {
+  if (res.statusCode == 403) {
     bool refreshed = await refreshAccessToken();
     if (refreshed) {
-      String? newToken = await prefs.getString('accessToken');
+      String? newToken = prefs.getString('accessToken');
       res = await http.get(
         Uri.parse("http://localhost:3000/api/user/profile"),
         headers: {"Authorization": "Bearer $newToken"},
       );
     } else {
-      throw Exception("Session expired. Please login again.");
+      await Navigator.popAndPushNamed(context, "/");
     }
   }
 
@@ -33,7 +34,7 @@ Future<Map<String, dynamic>> studentData() async {
   return jsonDecode(res.body);
 }
 
-Future<List<dynamic>> studentGrade() async {
+Future<List<dynamic>> studentGrade(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   final token = await getToken(); // getToken must return a String
   if (token == null) {
@@ -44,21 +45,22 @@ Future<List<dynamic>> studentGrade() async {
     headers: {"Authorization": "Bearer $token"},
   );
 
-  if (res.statusCode == 401) {
+  if (res.statusCode == 403) {
     bool refreshed = await refreshAccessToken();
     if (refreshed) {
-      String? newToken = await prefs.getString('accessToken');
+      String? newToken = prefs.getString('accessToken');
       res = await http.get(
-        Uri.parse("http://localhost:3000/api/user/profile"),
+        Uri.parse("http://localhost:3000/api/grade"),
         headers: {"Authorization": "Bearer $newToken"},
       );
     } else {
-      throw Exception("Session expired. Please login again.");
+      await Navigator.popAndPushNamed(context, "/");
     }
   }
 
   if (res.statusCode != 200) {
-    throw Exception('Failed to load profile: ${res.statusCode}');
+    // throw Exception('Failed to load profile: ${res.statusCode}');
+    await Navigator.popAndPushNamed(context, "/");
   }
 
   // Parse the JSON response

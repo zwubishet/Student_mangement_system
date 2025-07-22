@@ -7,7 +7,7 @@ class StudentStatusTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: studentGrade(),
+      future: studentGrade(context),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
