@@ -1,14 +1,64 @@
+import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:student_management_system_app/components/BackgroundCustompaint.dart';
 import 'package:student_management_system_app/components/BlueBackgroundCustompaint.dart';
-import 'package:student_management_system_app/pages/HomePage.dart';
+import 'package:student_management_system_app/services/loginServices.dart';
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+  LoginPage({super.key});
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController roleController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    Future<void> login(String? username, String? password, String? role) async {
+      if (username == null ||
+          username.isEmpty ||
+          password == null ||
+          password.isEmpty ||
+          role == null ||
+          role.isEmpty) {
+        print('All fields are required');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please enter username, password, and role')),
+        );
+        return;
+      }
+
+      try {
+        final res = await http.post(
+          Uri.parse('http://localhost:3000/api/auth/login'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'identifier': username,
+            'password': password,
+            'role': role,
+          }),
+        );
+
+        if (res.statusCode == 200) {
+          final data = json.decode(res.body);
+          final acessToken = data['accessToken'];
+          final refreshToken = data['refreshToken'];
+          await saveToken(acessToken, refreshToken);
+          Navigator.pushReplacementNamed(context, "/home");
+        } else {
+          print('Login failed: ${res.body}');
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Login failed')));
+        }
+      } catch (e) {
+        print('Login error: $e');
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Something went wrong')));
+      }
+    }
+
     return Scaffold(
       bottomNavigationBar: BottomAppBar(
         child: Padding(
@@ -73,27 +123,48 @@ class LoginPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 50),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Username',
-                      border: OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Colors.white,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: TextField(
+                      controller: usernameController,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Colors.white,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: TextField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: TextField(
+                      controller: roleController,
+                      decoration: InputDecoration(
+                        labelText: 'Role',
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -131,11 +202,10 @@ class LoginPage extends StatelessWidget {
                   ),
                   child: TextButton(
                     onPressed: () {
-                      // Handle login action
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const Homepage(),
-                        ),
+                      login(
+                        usernameController.text,
+                        passwordController.text,
+                        roleController.text,
                       );
                     },
                     child: const Text(
@@ -150,42 +220,6 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'Or Login with',
-                  style: TextStyle(fontSize: 16, color: Colors.black),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            // Handle Google login
-                          },
-                          child: Image.asset(
-                            'assets/google.png',
-                            width: 30,
-                            height: 30,
-                          ),
-                        ),
-                        SizedBox(width: 20),
-                        GestureDetector(
-                          onTap: () {
-                            // Handle Facebook login
-                          },
-                          child: Image.asset(
-                            'assets/facebook.png',
-                            width: 30,
-                            height: 30,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
