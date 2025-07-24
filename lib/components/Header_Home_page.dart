@@ -84,7 +84,9 @@ class HeaderSection extends StatelessWidget {
                     ),
                     Spacer(),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.popAndPushNamed(context, "/profile");
+                      },
                       child: Padding(
                         padding: const EdgeInsets.only(right: 5.0),
                         child: SizedBox(

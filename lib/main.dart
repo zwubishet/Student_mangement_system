@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:student_management_system_app/pages/HomePage.dart';
+import 'package:student_management_system_app/pages/ProfilePage.dart';
 import 'package:student_management_system_app/pages/login_page.dart';
 
 void main() {
@@ -18,7 +19,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       initialRoute: '/',
-      routes: {'/': (context) => LoginPage(), '/home': (context) => Homepage()},
+      routes: {
+        '/': (context) => LoginPage(),
+        '/home': (context) => Homepage(),
+        '/profile': (context) => Profilepage(),
+      },
     );
   }
 }

@@ -40,7 +40,7 @@ class StudentStatusTable extends StatelessWidget {
                 child: Table(
                   border: TableBorder.all(color: Colors.black),
                   columnWidths: const {
-                    0: FlexColumnWidth(1.3),
+                    0: FlexColumnWidth(1.2),
                     1: FlexColumnWidth(1),
                     2: FlexColumnWidth(1),
                     3: FlexColumnWidth(1),
@@ -48,18 +48,11 @@ class StudentStatusTable extends StatelessWidget {
                   children: [
                     TableRow(
                       decoration: BoxDecoration(color: Colors.blueAccent),
-                      children: [
+                      children: const [
                         Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text(
-                            "year",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            "subject",
+                            "Year",
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
@@ -73,48 +66,45 @@ class StudentStatusTable extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text(
-                            'Avarage',
+                            "Average",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            "Rank",
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ],
                     ),
-                    ...List.generate((data).length, (index) {
-                      final subject = data[index];
-                      print(subject);
+
+                    // One row per semester (no subject-level rows)
+                    ...data.map<TableRow>((grade) {
                       return TableRow(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              spreadRadius: 1,
-                              blurRadius: 5,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
                         children: [
                           Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(subject["year"].toString()),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              subject["subjectResults"][index]["subjectName"],
+                              "${grade["year"]} / ${grade["semester"]}",
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(subject["totalScore"].toString()),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(grade["totalScore"].toString()),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(subject["averageScore"].toString()),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(grade["averageScore"].toString()),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(grade["rank"].toString()),
                           ),
                         ],
                       );
-                    }),
+                    }).toList(),
                   ],
                 ),
               ),
@@ -123,7 +113,5 @@ class StudentStatusTable extends StatelessWidget {
         }
       },
     );
-
-    // Replace with your actual widget implementation
   }
 }

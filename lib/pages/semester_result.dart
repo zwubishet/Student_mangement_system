@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:student_management_system_app/components/complain_request_page.dart';
+import 'package:student_management_system_app/services/getStudentData.dart';
 
 class SemesterResultPage extends StatefulWidget {
-  const SemesterResultPage({super.key});
+  final year;
+  final semester;
+  const SemesterResultPage({
+    super.key,
+    required this.year,
+    required this.semester,
+  });
 
   @override
   State<SemesterResultPage> createState() => _SemesterResultPageState();
@@ -14,85 +21,110 @@ class _SemesterResultPageState extends State<SemesterResultPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Column(
-            children: [
-              PageHeaderSection(),
-              const SizedBox(height: 10),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          'Semester Results',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+          FutureBuilder(
+            future: semesterSubjectResult(
+              context,
+              widget.year,
+              widget.semester,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text("Error: ${snapshot.error}"));
+              } else if (!snapshot.hasData || snapshot.data == null) {
+                return const Center(child: Text("No result data found."));
+              }
+
+              final data = snapshot.data!;
+              final results = data['subjectResults'] as List;
+              final totalScore = data['totalScore'];
+              final averageScore = data['averageScore'];
+              final rank = data['rank'];
+
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    PageHeaderSection(
+                      total: totalScore,
+                      average: averageScore,
+                      rank: rank,
+                    ),
+                    const SizedBox(height: 10),
+                    SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              'Semester Results',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
                           ),
-                        ),
+                          Container(
+                            padding: const EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: results.isEmpty
+                                ? const Text("No subject results available.")
+                                : Column(
+                                    children: results.map((subject) {
+                                      return SubjectResults(
+                                        subjects: subject,
+                                        subject:
+                                            subject['subjectName'] ?? "Unknown",
+                                        result: "${subject['total'] ?? 0}/100",
+                                      );
+                                    }).toList(),
+                                  ),
+                          ),
+                        ],
                       ),
-                      // Add your result content here
-                      Container(
-                        padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 10,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            SubjectResults(
-                              subject: 'Mathematics',
-                              result: '95/100',
-                            ),
-                            SubjectResults(
-                              subject: 'General Science',
-                              result: '90/100',
-                            ),
-                            SubjectResults(
-                              subject: 'English',
-                              result: '85/100',
-                            ),
-                            SubjectResults(
-                              subject: 'History',
-                              result: '88/100',
-                            ),
-                            SubjectResults(subject: 'Art', result: '85/100'),
-                            SubjectResults(
-                              subject: 'Geography',
-                              result: '92/100',
-                            ),
-                            SubjectResults(
-                              subject: 'Sport Science',
-                              result: '82/100',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              );
+            },
           ),
-          Positioned(bottom: 10, right: 16, child: const FloatingAskButton()),
         ],
       ),
     );
   }
 }
 
+String getOrdinal(int number) {
+  if (number >= 11 && number <= 13) return "th";
+  switch (number % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+
 class PageHeaderSection extends StatelessWidget {
-  const PageHeaderSection({super.key});
+  final total;
+  final average;
+  final rank;
+  const PageHeaderSection({super.key, this.total, this.average, this.rank});
 
   @override
   Widget build(BuildContext context) {
@@ -177,8 +209,23 @@ class PageHeaderSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text(
-                  'TotalResult: 580/700',
+                Text(
+                  'TotalResult: ${total}/700',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        offset: Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  'Average: ${average}',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
@@ -192,23 +239,8 @@ class PageHeaderSection extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Text(
-                  'Average: 89.14%',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black,
-                        offset: Offset(2, 2),
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
-                ),
-                const Text(
-                  'Rank: 5th',
+                Text(
+                  'Rank: ${rank}',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
@@ -232,12 +264,14 @@ class PageHeaderSection extends StatelessWidget {
 }
 
 class SubjectResults extends StatefulWidget {
+  final Object subjects;
   final String subject;
   final String result;
   const SubjectResults({
     super.key,
     required this.subject,
     required this.result,
+    required this.subjects,
   });
 
   @override
@@ -332,9 +366,21 @@ class _SubjectResultsState extends State<SubjectResults> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      _buildRow('Test 1', '85/100'),
-                      _buildRow('Test 2', '90/100'),
-                      _buildRow('Test 3', '95/100'),
+                      _buildRow(
+                        'Test 1',
+                        (widget.subjects as Map<String, dynamic>)["test1"]
+                            .toString(),
+                      ),
+                      _buildRow(
+                        'Test 2',
+                        (widget.subjects as Map<String, dynamic>)["test2"]
+                            .toString(),
+                      ),
+                      _buildRow(
+                        'Test 3',
+                        (widget.subjects as Map<String, dynamic>)["test3"]
+                            .toString(),
+                      ),
                       const Divider(),
                       const Text(
                         'Final',
@@ -345,7 +391,11 @@ class _SubjectResultsState extends State<SubjectResults> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      _buildRow('Final Exam', '88/100'),
+                      _buildRow(
+                        'Final Exam',
+                        (widget.subjects as Map<String, dynamic>)["finalExam"]
+                            .toString(),
+                      ),
                       const Divider(),
                       const Text(
                         'Assignments',
@@ -356,8 +406,11 @@ class _SubjectResultsState extends State<SubjectResults> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      _buildRow('Assignment 1', '80/100'),
-                      _buildRow('Assignment 2', '85/100'),
+                      _buildRow(
+                        'Assignment',
+                        (widget.subjects as Map<String, dynamic>)["assignment"]
+                            .toString(),
+                      ),
                     ],
                   ),
                 ),

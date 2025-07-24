@@ -96,19 +96,37 @@ class _YearDropdownCardsState extends State<YearDropdownCards> {
                             style: const TextStyle(color: Colors.white),
                           ),
                           onTap: () {
-                            if (semester == 'First Semester') {
+                            if (semester == "First Semester") {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const SemesterResultPage(),
+                                  builder: (context) => SemesterResultPage(
+                                    year: widget.title,
+                                    semester: "1",
+                                  ),
+                                ),
+                              );
+                            } else if (semester == "Second Semester") {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SemesterResultPage(
+                                    year: widget.title,
+                                    semester: "2",
+                                  ),
                                 ),
                               );
                             } else {
-                              // Handle semester selection
-                              debugPrint('Selected $semester');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SemesterResultPage(
+                                    year: widget.title,
+                                    semester: "3",
+                                  ),
+                                ),
+                              );
                             }
-                            debugPrint('Selected $semester');
                           },
                         ),
                       )

@@ -56,37 +56,40 @@ class DropdownCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: studentData(context),
+    return FutureBuilder<List<dynamic>>(
+      future: studentGrade(context),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            height: 200,
-            width: double.infinity,
-            alignment: Alignment.center,
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Container(
-            height: 200,
-            width: double.infinity,
-            alignment: Alignment.center,
-            child: Text('Error loading data'),
-          );
+          return const Center(child: Text('Error loading data'));
         } else {
           final data = snapshot.data!;
-          return Column(
-            children: [
-              YearDropdownCards(title: "Year-2024", grade: "Grade 5"),
-              SizedBox(height: 10),
-              YearDropdownCards(title: "Year-2023", grade: "Grade 4"),
-              SizedBox(height: 10),
-              YearDropdownCards(title: "year-2022 ", grade: "Grade 3"),
-              SizedBox(height: 10),
-              YearDropdownCards(title: "Year-2021", grade: "Grade 2"),
-              SizedBox(height: 10),
-              YearDropdownCards(title: "Year-2020", grade: "Grade 1"),
-            ],
+          if (data.isEmpty) {
+            return const Center(child: Text("No grades available"));
+          }
+
+          // Extract unique years
+          final uniqueYears = data.map((item) => item['year']).toSet().toList()
+            ..sort((a, b) => b.compareTo(a)); // Optional: descending order
+
+          return ListView.builder(
+            itemCount: uniqueYears.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final year = uniqueYears[index];
+
+              return Column(
+                children: [
+                  YearDropdownCards(
+                    title: year.toString(),
+                    grade: "Grade 5", // Change if dynamic
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              );
+            },
           );
         }
       },
